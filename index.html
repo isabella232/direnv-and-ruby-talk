@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=" http-equiv="Content-Type">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta content="Asciidoctor 1.5.4" name="generator">
+<title>Using direnv with ruby and 12factor apps</title>
+<link href="deck.js/core/deck.core.css" rel="stylesheet">
+<link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/navigation/deck.navigation.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/status/deck.status.css" media="screen" rel="stylesheet">
+<link href="deck.js/themes/style/web-2.0.css" media="screen" rel="stylesheet">
+<link href="deck.js/themes/transition/horizontal-slide.css" media="screen" rel="stylesheet">
+<link href="deck.js/core/print.css" media="print" rel="stylesheet">
+<script src="deck.js/modernizr.custom.js"></script>
+</head>
+<body class="article">
+<div class="deck-container">
+<section class="slide" id="title-slide">
+<h1>Using direnv with ruby and 12factor apps</h1>
+</section>
+<section class="slide" id="_intro">
+<h2>Intro</h2>
+<div class="paragraph"><p>Jonas Pfenniger Chevalier IRL</p></div>
+<div class="paragraph"><p>zimbatm everywhere else</p></div>
+<div class="paragraph"><p><a class="bare" href="http://zimbatm.com">http://zimbatm.com</a></p></div>
+<div class="paragraph"><p>@zimbatm on twitter, github, skillmatter, &#8230;&#8203;</p></div>
+<div class="paragraph"><p>Works at <span class="image"><img alt="Pusher" src="pusher_logo_dark.png" width="40%"></span> on the pubsub messaging product.</p></div>
+</section>
+<section class="slide" id="_overview">
+<h2>Overview</h2>
+<div class="paragraph"><p>25 minutes</p></div>
+<div class="ulist">
+<ul>
+<li>presenting direnv</li>
+<li>how to use with ruby</li>
+<li>&#8230;&#8203; and 12factor apps</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_context">
+<h2>Context</h2>
+<div class="ulist">
+<ul>
+<li>shell</li>
+<li>prompt</li>
+<li>environment variables</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_enter_direnv">
+<h2>Enter direnv</h2>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>brew install direnv
+echo 'eval "$(direnv hook bash)"' &gt;&gt; ~/.bashrc
+exec bash</code></pre>
+</div>
+</div>
+<div class="paragraph"><p>supports bash, zsh, fish, tcsh and more</p></div>
+<div class="paragraph"><p>packages for homebrew, debian, archlinux and nixos. or just grab the binary.</p></div>
+</section>
+<section class="slide" id="_how_it_works">
+<h2>how it works</h2>
+<div class="paragraph"><p>hook into shell</p></div>
+<div class="paragraph"><p><code>direnv export</code> executed before every prompt
+ * looks for .envrc in the current directory and up
+ * if found, loads the .envrc in bash and get the ENV diff
+ * then injects the diff into the current shell (with state serialization)
+ * otherwise unloads</p></div>
+<div class="paragraph"><p>TODO: mtime, allowed</p></div>
+<div class="paragraph"><p>TODO: decision graph</p></div>
+<div class="paragraph"><p>tldr; cd into director, loads env, cd out, unloads env</p></div>
+</section>
+<section class="slide canvas-image" id="_state_machine" style="background-image: url(./direnv-export.png)">
+
+</section>
+<section class="slide" id="_security_model">
+<h2>security model</h2>
+<div class="paragraph slide"><p><code>~/.config/direnv/allowed/$(hash(path + .envrc content))</code></p></div>
+<div class="paragraph slide"><p>woot</p></div>
+</section>
+<section class="slide" id="_basic_usage">
+<h2>basic usage</h2>
+<div class="paragraph"><p>demo</p></div>
+</section>
+<section class="slide" id="_one_more_thing_the_stdlib">
+<h2>one more thing - the stdlib</h2>
+<div class="paragraph"><p>use</p></div>
+<div class="paragraph"><p>PATH_add
+load_prefix
+dotenv
+source_env / source_up
+layout / _ruby
+use</p></div>
+</section>
+<section class="slide" id="_build_your_own_ruby_version_switcher">
+<h2>build your own ruby version switcher</h2>
+<div class="paragraph"><p><code>ruby-install ruby 1.9.3</code></p></div>
+<div class="paragraph"><p><code>~/.direnvrc</code></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="bash language-bash">use_ruby() {
+	load_prefix "$HOME/.rubies/ruby-$1"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p><code>.envrc</code></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>use ruby 1.9.3-p551</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_small_improvements">
+<h2>small improvements</h2>
+<div class="paragraph"><p><code>~/.direnvrc</code></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="bash language-bash">use_ruby-version() {
+  use ruby "$(&lt; .ruby-version)"
+  layout ruby
+  PATH_add bin
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p><code>.envrc</code></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>dotenv
+use ruby-version</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_pulling_external_dependencies">
+<h2>pulling external dependencies</h2>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="bash language-bash">load_brew() {
+	...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p>or <code>./configure --prefix=$HOME/.custom/&lt;my-lib&gt;</code></p></div>
+<div class="paragraph"><p>or <code>use_nix</code></p></div>
+</section>
+<section class="slide" id="_pros_and_cons">
+<h2>pros and cons</h2>
+<div class="paragraph"><p>+ simple, can reason about
++ language-agnostic
++ flexible
++ easy to debug (if you know unix)</p></div>
+<div class="ulist">
+<ul>
+<li>need bash on the machine</li>
+<li>needs integration with IDE</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_questions">
+<h2>Questions ?</h2>
+<div class="paragraph"><p><a class="bare" href="http://direnv.net">http://direnv.net</a></p></div>
+<div class="paragraph"><p><a class="bare" href="http://zimbatm.com">http://zimbatm.com</a></p></div>
+</section>
+<div aria-role="navigation">
+<a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
+<a class="deck-next-link" href="#" title="Next">&#8594;</a>
+</div>
+<p aria-role="status" class="deck-status">
+<span class="deck-status-current"></span>
+/
+<span class="deck-status-total"></span>
+</p>
+</div>
+<script src="deck.js/jquery.min.js"></script>
+<script src="deck.js/core/deck.core.js"></script>
+<script src="deck.js/extensions/scale/deck.scale.js"></script>
+<script src="deck.js/extensions/menu/deck.menu.js"></script>
+<script src="deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="deck.js/extensions/status/deck.status.js"></script>
+<script>
+  (function($, deck, undefined) {
+    $.deck.defaults.keys['previous'] = [8, 33, 37, 39];
+    $.deck.defaults.keys['next'] = [13, 32, 34, 39];
+  
+    $.extend(true, $[deck].defaults, {
+        countNested: false
+    });
+  
+    $.deck('.slide');
+  })(jQuery, 'deck');
+</script>
+<style>
+  .slide.canvas-image {
+  -moz-background-size: cover;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -ms-box;
+  display: box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -ms-box-orient: vertical;
+  box-orient: vertical;
+  -moz-box-align: start;
+  -webkit-box-align: start;
+  -ms-box-align: start;
+  box-align: start;
+  -moz-box-pack: start;
+  -webkit-box-pack: start;
+  -ms-box-pack: start;
+  box-pack: start;}
+  
+  .bottom-left {
+    left: 1%;
+    bottom: 20%; }
+  
+  .top-left {
+    left: 1%;
+    top: 20%; }
+  
+  .bottom-right {
+    right: 1%;
+    bottom: 20%; }
+  
+  .top-right {
+    right: 1%;
+    top: 20%; }
+  
+  .center-up {
+    right: 50%;
+    top: 1%;
+  }
+  
+  .center-down {
+    right: 50%;
+    bottom: 1%;
+  }
+  .canvas-image .canvas-caption p {
+    text-align: center;
+    padding-top: 0;
+    padding: 0;
+    -moz-transform: none;
+    -webkit-transform: none;
+    -o-transform: none;
+    -ms-transform: none;
+    transform: none;
+    display: inline;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+    font-size: 58px;
+    -webkit-box-shadow: 2px 2px 2px #000;
+    -moz-box-shadow: 2px 2px 2px #000;
+    box-shadow: 2px 2px 2px #000;
+    padding: 1rem;
+    color: white; }
+  kbd.keyseq { color: #555555; }
+  kbd:not(.keyseq) {
+    display: inline-block;
+    color: #222222;
+    font-size: 0.7em;
+    line-height: 1.4;
+    background-color: #F7F7F7;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+    margin: -0.15em 0.15em 0 0.15em;
+    padding: 0.2em 0.6em;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  kbd kbd:first-child { margin-left: 0; }
+  kbd kbd:last-child { margin-right: 0; }
+</style>
+</body>
+</html>

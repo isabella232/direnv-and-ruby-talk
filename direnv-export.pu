@@ -1,0 +1,31 @@
+@startuml
+skinparam backgroundColor transparent
+
+start
+
+:direnv export;
+
+if (.envrc found?) then (yes)
+  if (has context?) then (yes)
+    if (same file and mtime?) then (yes)
+      stop
+    else (no)
+      :unload context;
+    endif
+  endif
+  if (is authorized?) then (yes)
+    :load .envrc;
+  else (no)
+    :alert user;
+  endif
+  stop
+else (no)
+  if (has context?) then (yes)
+    :unload context;
+  else (no)
+  end
+endif
+
+stop
+
+@enduml
