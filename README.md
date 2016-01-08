@@ -1,12 +1,12 @@
-# direnv talks
+# direnv and ruby talk
 
-Contains talks on direnv.
+Presented at LRUG January 2016: http://lrug.org/meetings/2016/january/
 
-To build run:
+
+## Build
 
 ```
+brew install plantuml
 bundle
-make
+rake
 ```
-
-Install plantuml to compile .pu files
