@@ -1,4 +1,4 @@
-= Using direnv with ruby and 12factor apps
+= Using direnv with ruby
 :backend: deckjs
 :deckjs_theme: web-2.0
 :deckjs_transition: horizontal-slide
@@ -10,13 +10,12 @@
 
 Jonas Pfenniger Chevalier IRL
 
-zimbatm everywhere else
+zimbatm everywhere else: twitter, github, ...
 
 http://zimbatm.com
 
-@zimbatm on twitter, github, skillmatter, ...
-
-Works at image:pusher_logo_dark.png["Pusher", width="40%"] on the pubsub messaging product.
+Works at image:pusher_logo_dark.png["Pusher", width="40%"]
+doing pubsub messaging over websocket
 
 ## Overview
 
@@ -24,7 +23,7 @@ Works at image:pusher_logo_dark.png["Pusher", width="40%"] on the pubsub messagi
 
 * presenting direnv
 * how to use with ruby
-* ... and 12factor apps
+* and 12factor apps
 
 ## Context
 
@@ -44,58 +43,51 @@ supports bash, zsh, fish, tcsh and more
 
 packages for homebrew, debian, archlinux and nixos. or just grab the binary.
 
-## how it works
+## How it works
 
 hook into shell
 
-`direnv export` executed before every prompt
- * looks for .envrc in the current directory and up
- * if found, loads the .envrc in bash and get the ENV diff
- * then injects the diff into the current shell (with state serialization)
- * otherwise unloads
+`eval "direnv export <shell>"` executed before every prompt
 
-TODO: mtime, allowed
+load `.envrc` in bash if found, export diff
 
-TODO: decision graph
+## Security model
 
-tldr; cd into director, loads env, cd out, unloads env
-
-[canvas-image=./direnv-export.png]
-
-## state machine
-
-## security model
-
-[%step]
 `~/.config/direnv/allowed/$(hash(path + .envrc content))`
 
-[%step]
-woot
+## Basic usage
 
-## basic usage
+ * cd into directory, loads env
+ * cd out, unloads env
 
-demo
+## The stdlib
 
-## one more thing - the stdlib
+injected into the bash `.envrc` context
 
-use
+* PATH_add
+* load_prefix
+* dotenv
+* source_env / source_up
+* layout
+* use
+* ...
 
-PATH_add
-load_prefix
-dotenv
-source_env / source_up
-layout / _ruby
-use
+`man direnv-stdlib`
 
+`direnv stdlib | less`
 
-## build your own ruby version switcher
+## Extend the stdlib
+
+Write your own in `~/.direnvrc`
+
+## Build your own adventure^Wruby version switcher
 
 `ruby-install ruby 1.9.3`
 
 `~/.direnvrc`
 ```bash
 use_ruby() {
-	load_prefix "$HOME/.rubies/ruby-$1"
+  load_prefix "$HOME/.rubies/ruby-$1"
 }
 ```
 
@@ -104,47 +96,44 @@ use_ruby() {
 use ruby 1.9.3-p551
 ```
 
-## small improvements
+## Small improvements
 
 `~/.direnvrc`
 ```bash
-use_ruby-version() {
-  use ruby "$(< .ruby-version)"
+use_ruby() {
+  load_prefix "$HOME/.rubies/$1"
   layout ruby
-  PATH_add bin
+}
+
+ruby-version() {
+  use ruby ruby-"$(< .ruby-version)"
 }
 ```
 
 `.envrc`
 ```
+ruby-version
 dotenv
-use ruby-version
 ```
 
-## pulling external dependencies
+## Git config
 
-```bash
-load_brew() {
-	...
-}
+How to avoid having `.direnv/` listed in git
+
+```
+$ git config core.excludesfile ~/.gitignore_global
 ```
 
-or `./configure --prefix=$HOME/.custom/<my-lib>`
+## Future
 
-or `use_nix`
-
-## pros and cons
-
-+ simple, can reason about
-+ language-agnostic
-+ flexible
-+ easy to debug (if you know unix)
-
-- need bash on the machine
-- needs integration with IDE
+* multiple profiles, `direnv switch`
+* dependency change-tracking
+* layout auto
 
 ## Questions ?
 
 http://direnv.net
+
+https://github.com/direnv/direnv-and-ruby-talk
 
 http://zimbatm.com

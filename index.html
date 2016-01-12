@@ -4,7 +4,7 @@
 <meta content="text/html; charset=" http-equiv="Content-Type">
 <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
 <meta content="Asciidoctor 1.5.4" name="generator">
-<title>Using direnv with ruby and 12factor apps</title>
+<title>Using direnv with ruby</title>
 <link href="deck.js/core/deck.core.css" rel="stylesheet">
 <link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet">
 <link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet">
@@ -18,15 +18,14 @@
 <body class="article">
 <div class="deck-container">
 <section class="slide" id="title-slide">
-<h1>Using direnv with ruby and 12factor apps</h1>
+<h1>Using direnv with ruby</h1>
 </section>
-<section class="slide" id="_intro">
-<h2>Intro</h2>
+<section class="slide" id="_hi">
+<h2>Hi</h2>
 <div class="paragraph"><p>Jonas Pfenniger Chevalier IRL</p></div>
-<div class="paragraph"><p>zimbatm everywhere else</p></div>
+<div class="paragraph"><p>zimbatm everywhere else: twitter, github, &#8230;&#8203;</p></div>
 <div class="paragraph"><p><a class="bare" href="http://zimbatm.com">http://zimbatm.com</a></p></div>
-<div class="paragraph"><p>@zimbatm on twitter, github, skillmatter, &#8230;&#8203;</p></div>
-<div class="paragraph"><p>Works at <span class="image"><img alt="Pusher" src="pusher_logo_dark.png" width="40%"></span> on the pubsub messaging product.</p></div>
+<div class="paragraph"><p>Works at <span class="image"><img alt="Pusher" src="pusher_logo_dark.png" width="40%"></span></p></div>
 </section>
 <section class="slide" id="_overview">
 <h2>Overview</h2>
@@ -35,7 +34,7 @@
 <ul>
 <li>presenting direnv</li>
 <li>how to use with ruby</li>
-<li>&#8230;&#8203; and 12factor apps</li>
+<li>and 12factor apps</li>
 </ul>
 </div>
 </section>
@@ -62,47 +61,53 @@ exec bash</code></pre>
 <div class="paragraph"><p>packages for homebrew, debian, archlinux and nixos. or just grab the binary.</p></div>
 </section>
 <section class="slide" id="_how_it_works">
-<h2>how it works</h2>
+<h2>How it works</h2>
 <div class="paragraph"><p>hook into shell</p></div>
-<div class="paragraph"><p><code>direnv export</code> executed before every prompt
- * looks for .envrc in the current directory and up
- * if found, loads the .envrc in bash and get the ENV diff
- * then injects the diff into the current shell (with state serialization)
- * otherwise unloads</p></div>
-<div class="paragraph"><p>TODO: mtime, allowed</p></div>
-<div class="paragraph"><p>TODO: decision graph</p></div>
-<div class="paragraph"><p>tldr; cd into director, loads env, cd out, unloads env</p></div>
-</section>
-<section class="slide canvas-image" id="_state_machine" style="background-image: url(./direnv-export.png)">
-
+<div class="paragraph"><p><code>eval "direnv export &lt;shell&gt;"</code> executed before every prompt</p></div>
+<div class="paragraph"><p>load <code>.envrc</code> in bash if found</p></div>
 </section>
 <section class="slide" id="_security_model">
-<h2>security model</h2>
-<div class="paragraph slide"><p><code>~/.config/direnv/allowed/$(hash(path + .envrc content))</code></p></div>
-<div class="paragraph slide"><p>woot</p></div>
+<h2>Security model</h2>
+<div class="paragraph"><p><code>~/.config/direnv/allowed/$(hash(path + .envrc content))</code></p></div>
 </section>
 <section class="slide" id="_basic_usage">
-<h2>basic usage</h2>
-<div class="paragraph"><p>demo</p></div>
+<h2>Basic usage</h2>
+<div class="ulist">
+<ul>
+<li>cd into directory, loads env</li>
+<li>cd out, unloads env</li>
+</ul>
+</div>
 </section>
-<section class="slide" id="_one_more_thing_the_stdlib">
-<h2>one more thing - the stdlib</h2>
-<div class="paragraph"><p>use</p></div>
-<div class="paragraph"><p>PATH_add
-load_prefix
-dotenv
-source_env / source_up
-layout / _ruby
-use</p></div>
+<section class="slide" id="_the_stdlib">
+<h2>The stdlib</h2>
+<div class="paragraph"><p>injected into the bash <code>.envrc</code> context</p></div>
+<div class="ulist">
+<ul>
+<li>PATH_add</li>
+<li>load_prefix</li>
+<li>dotenv</li>
+<li>source_env / source_up</li>
+<li>layout</li>
+<li>use</li>
+<li>&#8230;&#8203;</li>
+</ul>
+</div>
+<div class="paragraph"><p><code>man direnv-stdlib</code></p></div>
+<div class="paragraph"><p><code>direnv stdlib | less</code></p></div>
 </section>
-<section class="slide" id="_build_your_own_ruby_version_switcher">
-<h2>build your own ruby version switcher</h2>
+<section class="slide" id="_extend_the_stdlib">
+<h2>Extend the stdlib</h2>
+<div class="paragraph"><p>Write your own in <code>~/.direnvrc</code></p></div>
+</section>
+<section class="slide" id="_build_your_own_adventure_wruby_version_switcher">
+<h2>Build your own adventure^Wruby version switcher</h2>
 <div class="paragraph"><p><code>ruby-install ruby 1.9.3</code></p></div>
 <div class="paragraph"><p><code>~/.direnvrc</code></p></div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="bash language-bash">use_ruby() {
-	load_prefix "$HOME/.rubies/ruby-$1"
+  load_prefix "$HOME/.rubies/ruby-$1"
 }</code></pre>
 </div>
 </div>
@@ -114,53 +119,51 @@ use</p></div>
 </div>
 </section>
 <section class="slide" id="_small_improvements">
-<h2>small improvements</h2>
+<h2>Small improvements</h2>
 <div class="paragraph"><p><code>~/.direnvrc</code></p></div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">use_ruby-version() {
-  use ruby "$(&lt; .ruby-version)"
+<pre class="highlight"><code class="bash language-bash">use_ruby() {
+  load_prefix "$HOME/.rubies/$1"
   layout ruby
-  PATH_add bin
+}
+
+ruby-version() {
+  use ruby ruby-"$(&lt; .ruby-version)"
 }</code></pre>
 </div>
 </div>
 <div class="paragraph"><p><code>.envrc</code></p></div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>dotenv
-use ruby-version</code></pre>
+<pre class="highlight"><code>ruby-version
+dotenv</code></pre>
 </div>
 </div>
 </section>
-<section class="slide" id="_pulling_external_dependencies">
-<h2>pulling external dependencies</h2>
+<section class="slide" id="_git_config">
+<h2>Git config</h2>
+<div class="paragraph"><p>How to avoid having <code>.direnv/</code> listed in git</p></div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">load_brew() {
-	...
-}</code></pre>
+<pre class="highlight"><code>$ git config core.excludesfile ~/.gitignore_global</code></pre>
 </div>
 </div>
-<div class="paragraph"><p>or <code>./configure --prefix=$HOME/.custom/&lt;my-lib&gt;</code></p></div>
-<div class="paragraph"><p>or <code>use_nix</code></p></div>
 </section>
-<section class="slide" id="_pros_and_cons">
-<h2>pros and cons</h2>
-<div class="paragraph"><p>+ simple, can reason about
-+ language-agnostic
-+ flexible
-+ easy to debug (if you know unix)</p></div>
+<section class="slide" id="_future">
+<h2>Future</h2>
 <div class="ulist">
 <ul>
-<li>need bash on the machine</li>
-<li>needs integration with IDE</li>
+<li>multiple profiles, <code>direnv switch</code></li>
+<li>dependency change-tracking</li>
+<li>layout auto</li>
 </ul>
 </div>
 </section>
 <section class="slide" id="_questions">
 <h2>Questions ?</h2>
 <div class="paragraph"><p><a class="bare" href="http://direnv.net">http://direnv.net</a></p></div>
+<div class="paragraph"><p><a class="bare" href="https://github.com/direnv/direnv-and-ruby-talk">https://github.com/direnv/direnv-and-ruby-talk</a></p></div>
 <div class="paragraph"><p><a class="bare" href="http://zimbatm.com">http://zimbatm.com</a></p></div>
 </section>
 <div aria-role="navigation">
